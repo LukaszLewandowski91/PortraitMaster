@@ -9,10 +9,29 @@ exports.add = async (req, res) => {
 
     if (title && author && email && file) {
       // if fields are not empty...
+      const pattern = new RegExp(
+        /(<\s*(strong|em)*>(([A-z]|\s)*)<\s*\/\s*(strong|em)>)|(([A-z]|\s|\.)*)/,
+        "g"
+      );
+
+      const emailPattern = new RegExp("[a-z0-9]+@[a-z]+.[a-z]{2,3}");
+
+      if (!emailPattern.test(email)) {
+        throw new Error("Invalid email");
+      }
+
+      const titleMatched = title.match(pattern).join("");
+      const authorMatched = author.match(pattern).join("");
+      if (
+        titleMatched.length < title.length ||
+        authorMatched.length < author.length
+      ) {
+        throw new Error("Invalid characters...");
+      }
 
       const fileName = file.path.split("/").slice(-1)[0]; // cut only filename from full path, e.g. C:/test/abc.jpg -> abc.jpg
       const fileExt = fileName.split(".").slice(-1)[0];
-      console.log("rozszerzenie", fileExt);
+
       if (fileExt === "jpg" || fileExt === "jpeg" || fileExt === "png") {
         const newPhoto = new Photo({
           title,
